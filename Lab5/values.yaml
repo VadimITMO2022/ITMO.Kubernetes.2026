@@ -1,0 +1,23 @@
+statefulsetservice:
+  servicename: redis-service
+  name: redis
+  port: 6380
+statefulset:
+  name: redis
+  service-name:  "redis-service"
+  replicas: 2
+  image: redis:latest
+  containerPort: 6380
+  dataname: redis-data
+  containerimage: redis
+  storage: 1Gi
+deployment:
+  app: chat-api
+  containerPort: 5001
+  replicas: 2
+  image:
+    repo: rayhimself
+    name: basic-redis-chat-app-api
+    tag:  latest
+    
+ 

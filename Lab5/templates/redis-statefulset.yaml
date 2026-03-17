@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.statefulsetservice.servicename  }}
+  labels:
+    app: {{ .Values.statefulsetservice.name  }}
+spec:
+  ports:
+  - port: {{ .Values.statefulsetservice.port  }}
+    name: {{ .Values.statefulsetservice.name  }}
+  clusterIP: None # Headless service для стабильных DNS-имен
+  selector:
+    app: {{ .Values.statefulsetservice.name  }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name:  {{ .Values.statefulset.name  }}
+spec:
+  serviceName: {{ .Values.statefulset.serviceName  }}
+  replicas: 1 # Количество реплик
+  selector:
+    matchLabels:
+      app: {{ .Values.statefulset.name  }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.statefulset.name  }}
+    spec:
+      containers:
+      - name: {{ .Values.statefulset.name  }}
+        image: {{ .Values.statefulset.image  }}
+        command: ["redis-server", "--appendonly", "yes"] # Включаем AOF для сохранения данных
+        ports:
+        - containerPort: {{ .Values.statefulset.containerPort  }}
+          name: redis
+        volumeMounts:
+        - name: {{ .Values.statefulset.dataname  }}
+          mountPath: /data
+  volumeClaimTemplates: # Автоматическое создание PVC для каждого пода
+  - metadata:
+      name: {{ .Values.statefulset.dataname  }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.statefulset.storage  }}
